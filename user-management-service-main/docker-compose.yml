@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: common_user_service
+    image: "common_user_backend_module"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - ${PORT:-8877}:${PORT:-8877}
+    environment:
+      - PORT
+      - JWT_SECRET
+      - DB_USERNAME
+      - DB_PASSWORD
+      - DB_DATABASE_NAME
+      - DB_URL
+    networks:
+      - common_user_service_network
+      - common_user_service_db_network
+    depends_on:
+      - db
+  db:
+    container_name: common_user_service_db
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_DATABASE_NAME}
+    volumes:
+      - common_user_service_db:/data
+    networks:
+      - common_user_service_db_network
+volumes:
+  common_auth_user_service_db:
+    name: common_user_service_db
+networks:
+  common_auth_user_service_network:
+    name: common_user_service_network
+  common_auth_user_service_db_network:
+    name: common_user_service_db_network

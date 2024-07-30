@@ -1,0 +1,481 @@
+openapi: '3.0.0'
+info:
+  title: User Management Service
+  version: 1.0.0
+  description: API Specification for Common User Module
+
+servers:
+  - url: '{hosturl}'
+    variables:
+      hosturl:
+        enum:
+          - 'http://localhost:8080'
+        default: 'http://localhost:8080'
+
+tags:
+  - name: Users
+    description: User APIs
+
+paths:
+  /api/v1/users:
+    get:
+      summary: Get list of users
+      operationId: getAllUsers
+      deprecated: false
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/EmailSearch'
+        - $ref: '#/components/parameters/CountryCode'
+        - $ref: '#/components/parameters/PhoneNumberSearch'
+        - $ref: '#/components/parameters/firstNameSearch'
+        - $ref: '#/components/parameters/middleNameSearch'
+        - $ref: '#/components/parameters/lastNameSearch'
+        - $ref: '#/components/parameters/stringSearch'
+      responses:
+        '200':
+          description: list of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUsersResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+    post:
+      summary: Create a User
+      operationId: createUser
+      deprecated: false
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: Successfully created a User
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                timestamp: '2023-02-21T19:05:12.451Z'
+                code: 201
+                status: true
+                message: 'string'
+                data:
+                  - id: string
+                    firstName: string
+                    middleName: string
+                    lastName: string
+                    email: user@example.com
+                    countryCode: string
+                    phoneNumber: string
+                    enabled: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+  /api/v1/users/{userId}:
+    get:
+      summary: Get User by Id
+      operationId: getUserById
+      deprecated: false
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: the users id
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+    patch:
+      summary: Update a User
+      operationId: updateUser
+      deprecated: false
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: the users id
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Successfully updated the user.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+    delete:
+      summary: Delete User by Id
+      operationId: deleteUserById
+      deprecated: false
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: the users id
+      responses:
+        '200':
+          description: Successfully deleted user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/UnexpectedError'
+
+components:
+  parameters:
+    Page:
+      in: query
+      name: page
+      schema:
+        type: integer
+        format: int32
+        default: 1
+      required: false
+      description: the page number.
+    PageSize:
+      in: query
+      name: size
+      schema:
+        type: integer
+        format: int32
+        default: 20
+      required: false
+      description: the size of a page
+    EmailSearch:
+      in: query
+      name: email
+      schema:
+        type: string
+      required: false
+      description: search term for email
+    CountryCode:
+      in: query
+      name: countryCode
+      schema:
+        type: string
+      required: false
+      description: search term for countryCode
+    PhoneNumberSearch:
+      in: query
+      name: phoneNumber
+      schema:
+        type: string
+      required: false
+      description: search term for phone number
+    firstNameSearch:
+      in: query
+      name: firstName
+      schema:
+        type: string
+      required: false
+      description: search term for firstName
+    middleNameSearch:
+      in: query
+      name: middleName
+      schema:
+        type: string
+      required: false
+      description: search term for middleName
+    lastNameSearch:
+      in: query
+      name: lastName
+      schema:
+        type: string
+      required: false
+      description: search term for lastName
+    stringSearch:
+      in: query
+      name: q
+      schema:
+        type: string
+      required: false
+      description: search term for any field
+  schemas:
+    CreateUserRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Users first name.
+        middleName:
+          type: string
+          description: Users middle name.
+        lastName:
+          type: string
+          description: Users last name.
+        email:
+          type: string
+          format: email
+          description: Users email.
+        countryCode:
+          type: string
+          description: Users countryCode
+        phoneNumber:
+          type: string
+          description: Users phone number.
+        password:
+          type: string
+          description: Users password.
+        enabled:
+          type: boolean
+          description: whether to enable, disable the created user.
+          default: false
+    UserResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: The server time at which this response was created.
+        code:
+          type: integer
+          format: int32
+          description: The status code the server returned.
+          default: 200
+        status:
+          type: boolean
+          description: Whether or not the request was a success or not.
+        message:
+          type: string
+          description: A short success message from server
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDto'
+    UpdateUserRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Users first name.
+        middleName:
+          type: string
+          description: Users middle name.
+        lastName:
+          type: string
+          description: Users last name.
+        password:
+          type: string
+          description: Users password.
+        enabled:
+          type: boolean
+          description: whether to enable, disable the created user.
+    GetUsersResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: The server time at which this response was created.
+        code:
+          type: integer
+          format: int32
+          description: The status code the server returned.
+          example: 200
+        status:
+          type: boolean
+          description: Whether or not the request was a success or not.
+          default: true
+        message:
+          type: string
+          description: A short success message from server
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPage'
+    UserPage:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int64
+          description: The current page number.
+        size:
+          type: integer
+          format: int32
+          description: The size of current page.
+        first:
+          type: boolean
+          description: whether current page is the first one.
+        last:
+          type: boolean
+          description: whether current page is the last one.
+        totalPages:
+          type: integer
+          format: int64
+          description: total no:of pages available
+        totalElements:
+          type: integer
+          format: int64
+          description: total no:of elements available.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDto'
+    ApiResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: The server time at which this response was created.
+        code:
+          type: integer
+          format: int32
+          description: The status code the server returned.
+          default: 200
+        status:
+          type: boolean
+          description: Whether or not the request was a success or not.
+        message:
+          type: string
+          description: A short success message from server
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: A identifier that uniquely identifies the user.
+        firstName:
+          type: string
+          description: Users first name.
+        middleName:
+          type: string
+          description: Users middle name.
+        lastName:
+          type: string
+          description: Users last name.
+        email:
+          type: string
+          format: email
+          description: users email.
+        countryCode:
+          type: string
+          description: users countryCode.
+        phoneNumber:
+          type: string
+          description: users phone number.
+        enabled:
+          type: boolean
+          description: whether or not user is enabled.
+    ApiError:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: The server time at which this response was created.
+        code:
+          type: integer
+          format: int32
+          description: The status code the server returned.
+        status:
+          type: boolean
+          description: Whether or not the request was a success or not.
+          default: false
+        message:
+          type: string
+          description: A short error message from server. If there are multiple errors they will be comma seperated
+  responses:
+    BadRequest:
+      description: Request syntax is invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: 2023-02-21T18:53:37.709Z
+            code: 400
+            status: false
+            message: 'bad request'
+    UnAuthorized:
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: 2023-02-21T18:53:37.709Z
+            code: 401
+            status: false
+            message: 'unauthorized'
+    NotFound:
+      description: Requested resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: 2023-02-21T18:53:37.709Z
+            code: 404
+            status: false
+            message: 'not found'
+    UnexpectedError:
+      description: Unexpected server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: 2023-02-21T18:53:37.709Z
+            code: 500
+            status: false
+            message: 'something unexpected occured'
+    Forbidden:
+      description: Forbidden error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: 2023-02-21T18:53:37.709Z
+            code: 403
+            status: false
+            message: 'forbidden'

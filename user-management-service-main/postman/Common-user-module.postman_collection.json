@@ -1,0 +1,199 @@
+{
+	"info": {
+		"_postman_id": "12b245f6-5706-483d-b581-b5d3262c4e6a",
+		"name": "Common-user-module",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create-user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"manu\",\n    \"middileName\": \"pilla\",\n    \"lastName\": \"lilli\",\n    \"email\": \"new@g.com\",\n    \"countryCode\": \"+91\",\n    \"phoneNumber\": \"4238494786\",\n    \"password\": \"123456\",\n    \"enabled\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}/users",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update-user",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"janu\",\n    \"middileName\": \"rilla\",\n    \"lastName\": \"lalu\",\n    \"password\": \"123456\",\n    \"enabled\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}/users/:id",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "649140e255be5ae7cd147903"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search-user",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}/users/?q=4238494786",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users",
+						""
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "4238494786"
+						},
+						{
+							"key": "phoneNumber",
+							"value": "6563839389",
+							"disabled": true
+						},
+						{
+							"key": "email",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "firstName",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "lastName",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "middileName",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "enabled",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get-all-users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/users/",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete-user",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}users/:id",
+					"host": [
+						"{{baseurl}}users"
+					],
+					"path": [
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get-by-Id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/users/:Id",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users",
+						":Id"
+					],
+					"variable": [
+						{
+							"key": "Id",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,111 @@
+#!groovy
+
+@Library('flycatch-jenkins-shared-library') _
+
+pipeline {
+
+    agent any
+    options {
+        disableConcurrentBuilds(abortPrevious: true)
+    }
+
+    environment {
+        APP_NAME = "common-user-backend_module"
+        BUILD_ID = "${APP_NAME}.${BUILD_NUMBER}"
+        NODE_VERSION = "18.14"
+    }
+
+    stages {
+        stage("Analysis") {
+            agent {
+                docker {
+                    image "node:${NODE_VERSION}-alpine" // replace with the project specific image
+                    reuseNode true
+                }
+            }
+
+            stages {
+                stage("build") {
+                    steps {
+                        sh script: '[ -f "package-lock.json" ] && npm ci --ignore-scripts || npm i --ignore-scripts', label: 'install depedencies'
+                        sh script: 'npm run build', label: 'npm build'
+                    }
+                }
+                stage("lint") {
+                    steps {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            sh script: '''
+                                        npx eslint "{src,apps,libs,test}/**/*.ts" \
+                                                    -f checkstyle \
+                                                    -o ./eslint-results.xml
+                                        ''',
+                                label: 'lint'
+                        }
+                    }
+                }
+                stage("static analysis") {
+                    steps {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            sh script: 'npm i jscpd -D'
+                            sh script: '''
+                                        npx jscpd --pattern "src/**/*.{js,ts}" \
+                                                  --min-tokens 75 \
+                                                  --min-lines 1 \
+                                                  --threshold 0 \
+                                                  --ignore "**/{models,model,entity}/**/*.{ts,js}" \
+                                                  --reporters xml \
+                                                  --output ./reports/ \
+                                                  --format "typescript,javascript" \
+                                                  --blame \
+                                                  --exitCode 1
+                                        ''',
+                                label: 'cpd'
+                        }
+                    }
+                }
+                // TODO: add OWASP vulnerability scan to project code
+            }
+            post {
+                always {
+                    withChecks('eslint') {
+                        recordIssues(
+                            publishAllIssues: true,
+                            enabledForFailure: true, aggregatingResults: true,
+                            tools: [esLint(pattern: '**/*eslint-results.xml', reportEncoding: 'UTF-8')],
+                            qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+                        )
+                    }
+                    withChecks('cpd') {
+                        recordIssues(
+                            publishAllIssues: true,
+                            enabledForFailure: true, aggregatingResults: true,
+                            tools: [cpd(pattern: './reports/*.xml', reportEncoding: 'UTF-8')],
+                            qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+                        )
+                    }
+                }
+            }
+        }
+
+        stage("Dockerize") {
+            steps {
+                // add a label to all stages of the docker file.
+                sh 'sed -i "/^FROM/a LABEL BUILD_ID=${BUILD_ID}" Dockerfile'
+                sh 'docker build --no-cache --force-rm  -t ${BUILD_ID} .'
+            }
+        }
+
+        // TODO: add publish stage (image registry, github release)
+    }
+
+    post {
+        failure {
+            sendNotifications(currentBuild.result)
+        }
+        cleanup {
+            // removes all intermediate and build image from jenkins server
+            sh 'docker rmi $(docker images -q -f "label=BUILD_ID=${BUILD_ID}")'
+        }
+    }
+
+}

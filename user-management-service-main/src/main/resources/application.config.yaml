@@ -1,0 +1,22 @@
+db:
+  user: ${DB_USERNAME}
+  password: ${DB_PASSWORD}
+  url: ${DB_URL}
+  name: ${DB_DATABASE_NAME}
+
+server:
+  base: /api/v1
+  port: ${PORT}
+  cors:
+    allowedHeaders: '*'
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']
+    origin: '*'
+    credentials: false
+  static:
+    path: /api/assets
+  swagger-ui:
+    path: /swagger-ui
+    schema: /api/assets/openapi.yaml
+
+app:
+  passwordHashRounds: 10
